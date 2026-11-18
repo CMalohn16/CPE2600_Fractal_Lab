@@ -14,8 +14,11 @@
 #include <fcntl.h>
 #include <signal.h>
 
-#define MAX_PROCESSORS 3
-#define NUM_IMAGES 5
+#define MAX_NAME_LEN 100
+#define NUM_IMAGES 50
+
+#define X_OFFSET_STR "0.331"
+#define Y_OFFSET_STR "0.391"
 
 
 /**
@@ -29,12 +32,21 @@ void exitProgram() {
 
 int main(int argc, char *argv[])
 {
+    char c;
+
+    // Caps at 14 processors by default
+	int maxProc = 14;
+
+	while((c = getopt(argc,argv,"p:"))!=-1) {
+		if (c == 'p')
+		{
+            maxProc = atoi(optarg);
+		}
+	}
+
     signal(SIGINT, exitProgram);
 
-    sem_t *sem = sem_open("/mysem", O_CREAT, 0666, MAX_PROCESSORS);
-    // sem_close(sem);
-    // sem_unlink("/mysem");
-    // return 0;
+    sem_t *sem = sem_open("/mysem", O_CREAT, 0666, maxProc);
 
     for (int image_num = 0; image_num < NUM_IMAGES; image_num++)
     {
@@ -42,16 +54,22 @@ int main(int argc, char *argv[])
         int pid = fork();
         if (pid == 0)
         {
-            printf("Process %d is waiting\n", getpid());
-            usleep(1000000);
-            printf("Process %d is done\n", getpid());
-            //execl("mandel", "-o", "cool.bmp", (char *) NULL);
-            sem_post(sem);
-            exit(0);
+            printf("Process %d is active\n", getpid());
+            char filename[MAX_NAME_LEN];
+            char scaleStr[25];
+            sprintf(filename, "images/mandel%d.jpg", image_num);
+            sprintf(scaleStr, "%f", 2.0 / ((image_num + 1) * (image_num + 1)));
+            execl("mandel", "mandel", 
+                "-x", X_OFFSET_STR,
+                "-y", Y_OFFSET_STR,
+                "-s", scaleStr, 
+                "-o", filename, 
+                "-p", "/mysem", 
+                (char *) NULL);
         }
     }
 
-    for (int i = 0; i < MAX_PROCESSORS; i++)
+    for (int i = 0; i < maxProc; i++)
     {
         sem_wait(sem);
         printf("i: %d\n", i);

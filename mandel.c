@@ -10,6 +10,8 @@
 #include <stdio.h>
 #include <unistd.h>
 #include "jpegrw.h"
+#include <semaphore.h>
+#include <stdbool.h>
 
 // local routines
 static int iteration_to_color( int i, int max );
@@ -33,11 +35,12 @@ int main( int argc, char *argv[] )
 	int    image_width = 1000;
 	int    image_height = 1000;
 	int    max = 1000;
+	sem_t *sem = NULL;
 
 	// For each command line argument given,
 	// override the appropriate configuration value.
 
-	while((c = getopt(argc,argv,"x:y:s:W:H:m:o:h"))!=-1) {
+	while((c = getopt(argc,argv,"x:y:s:W:H:m:o:p:h"))!=-1) {
 		switch(c) 
 		{
 			case 'x':
@@ -60,6 +63,9 @@ int main( int argc, char *argv[] )
 				break;
 			case 'o':
 				outfile = optarg;
+				break;
+			case 'p':
+				sem = sem_open(optarg, 0);
 				break;
 			case 'h':
 				show_help();
@@ -88,6 +94,13 @@ int main( int argc, char *argv[] )
 
 	// free the mallocs
 	freeRawImage(img);
+
+	// sem_post only if -p arg is given
+	if (sem)
+	{
+		sem_post(sem);
+		sem_close(sem);
+	}
 
 	return 0;
 }
