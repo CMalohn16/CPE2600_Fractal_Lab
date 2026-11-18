@@ -4,7 +4,7 @@
 * @date 11/14/2026
 * @class CPE2600 - 121
 * @brief Creates a video zooming into the madelbrot set using varying numbers of child processes
-* Compile with makefile and run with ./mandel
+* Compile with makefile and run with ./mandelmovie -P numProcessors
  */
 
 #include <stdio.h>
@@ -44,21 +44,25 @@ int main(int argc, char *argv[])
 		}
 	}
 
+    // Registers a signal to unlink the semaphore if the program ends unexpectedly
     signal(SIGINT, exitProgram);
 
     sem_t *sem = sem_open("/mysem", O_CREAT, 0666, maxProc);
 
     for (int image_num = 0; image_num < NUM_IMAGES; image_num++)
     {
+        //Wait for semaphore to say there is a process open
         sem_wait(sem);
         int pid = fork();
+        //Use the child to generate an image
+        //Parent loops back to sem_wait
         if (pid == 0)
         {
-            printf("Process %d is active\n", getpid());
             char filename[MAX_NAME_LEN];
             char scaleStr[25];
             sprintf(filename, "images/mandel%d.jpg", image_num);
             sprintf(scaleStr, "%f", 2.0 / ((image_num + 1) * (image_num + 1)));
+            //execute the mandel program and give it the semaphore so that it can sem_post when complete
             execl("mandel", "mandel", 
                 "-x", X_OFFSET_STR,
                 "-y", Y_OFFSET_STR,
@@ -69,10 +73,10 @@ int main(int argc, char *argv[])
         }
     }
 
+    //Wait for all active processes to finish
     for (int i = 0; i < maxProc; i++)
     {
         sem_wait(sem);
-        printf("i: %d\n", i);
     }
 
     sem_close(sem);
