@@ -5,11 +5,13 @@ Labs 11 and 12 for systems programming
 
 Compile using makefile (make command)
 
-Run with ./mandelmovie -p maxProcesses
+Run with ./mandelmovie -n maxProcesses
+
+Resulting images are stored in a new folder called 'images' in the form mandel%d.jpg where %d is the image number
 
 ### Implementation
 
-The program starts by parsing the -p argument to determine the largest amount of processes it should run at a time. Then, a semaphore is opened, starting at this value. The main program waits for the semaphore before making a child that executes the mandel program. This happens 50 times so that 50 images are created.
+The program starts by parsing the -n argument to determine the largest amount of processes it should run at a time. Then, a semaphore is opened, starting at this value. The main program waits for the semaphore before making a child that executes the mandel program. This happens 50 times so that 50 images are created.
 
 ### Time vs. Processes Graph
 

@@ -37,8 +37,8 @@ int main(int argc, char *argv[])
     // Caps at 14 processors by default
 	int maxProc = 14;
 
-	while((c = getopt(argc,argv,"p:"))!=-1) {
-		if (c == 'p')
+	while((c = getopt(argc,argv,"n:"))!=-1) {
+		if (c == 'n')
 		{
             maxProc = atoi(optarg);
 		}
