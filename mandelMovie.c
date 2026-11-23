@@ -36,11 +36,20 @@ int main(int argc, char *argv[])
 
     // Caps at 14 processors by default
 	int maxProc = 14;
+    int maxThreads = 1;
 
-	while((c = getopt(argc,argv,"n:"))!=-1) {
-		if (c == 'n')
+	while((c = getopt(argc,argv,"n:t:"))!=-1) {
+		switch (c)
 		{
-            maxProc = atoi(optarg);
+            case 'n':
+                printf("n\n");
+                maxProc = atoi(optarg);
+                break;
+            case 't':
+                printf("t\n");
+                maxThreads = atoi(optarg);
+                break;
+
 		}
 	}
 
@@ -60,15 +69,21 @@ int main(int argc, char *argv[])
         {
             char filename[MAX_NAME_LEN];
             char scaleStr[25];
+            char threadStr[25];
             sprintf(filename, "images/mandel%d.jpg", image_num);
-            sprintf(scaleStr, "%f", 2.0 / ((image_num + 1) * (image_num + 1)));
+            sprintf(scaleStr, "%f", 2.0 / ((image_num + 1)));
+            //sprintf(scaleStr, "%f", 0.3 - (0.005 * (image_num + 1)));
+            //sprintf(scaleStr, "%f", 2.0 / ((image_num + 1) * (image_num + 1)));
+            sprintf(threadStr, "%d", maxThreads);
             //execute the mandel program and give it the semaphore so that it can sem_post when complete
             execl("mandel", "mandel", 
                 "-x", X_OFFSET_STR,
                 "-y", Y_OFFSET_STR,
                 "-s", scaleStr, 
+                "-m", "750",
                 "-o", filename, 
                 "-p", "/mysem", 
+                "-t", threadStr,
                 (char *) NULL);
         }
     }
