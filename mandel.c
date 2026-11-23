@@ -200,8 +200,6 @@ void compute_image(imgRawImage* img, double xmin, double xmax, double ymin, doub
 			sections[i].end = startingPixel;
 		}
 
-		printf("%d, %p\n", sections[i].start, &(sections[i]));
-
 		pthread_create(&threadArr[i], NULL, &compute_section, &(sections[i]));
 	}
 
