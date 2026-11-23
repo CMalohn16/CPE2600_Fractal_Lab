@@ -42,11 +42,9 @@ int main(int argc, char *argv[])
 		switch (c)
 		{
             case 'n':
-                printf("n\n");
                 maxProc = atoi(optarg);
                 break;
             case 't':
-                printf("t\n");
                 maxThreads = atoi(optarg);
                 break;
 
